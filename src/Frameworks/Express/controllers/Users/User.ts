@@ -12,25 +12,16 @@ const storage = multer({dest: './public/uploads/user/'})
 const userController = express.Router()
 
 userController.post("/create", storage.single("user_image"), async (req: Request, res: Response) => { 
-    const {name, email, description, password}: {name: string, email: string, description: string, password: string} = req.body
+    const {name, email, description, password, state, LGA, city, home_address}: {name: string, email: string, description: string, password: string, state: string, LGA: string, city:string,  home_address: string, } = req.body
 
     const image = req.file
-    console.log(image)
 
     const UserRepo = new userRepository()
     const UsersUseCase = new userUseCase(UserRepo)
 
     try{ 
-        var addNewUser
-        if(image == undefined){
-            console.log("No Image") 
-            addNewUser = await UsersUseCase.createUserWithoutImage(name, email, description, password)
-            res.status(201).json(addNewUser)
-        }else{ 
-            addNewUser = await UsersUseCase.createUserWithImage(name, email, description, password,  image)
-            res.status(201).json(addNewUser)
-        }
-            
+        const addNewUser = await UsersUseCase.createUser(name, email, description, password, state, LGA, city, home_address, image)
+        res.status(201).json(addNewUser)
     }catch(error){ 
         console.error("Error adding new user:", error);
         res.status(501).json({error: "Failed to add new user"})
@@ -55,7 +46,7 @@ userController.post("/login", async (req:Request, res: Response) => {
         const refresh_token = jwt.sign(
             {id: loggedInUser?.id}, 
             process.env.REFRESH_TOKEN_SECRET!, 
-            {expiresIn: "1h"}
+            {expiresIn: "1d"}
         )
 
         // Assigning the refresh_token to the http-Cookie 
@@ -65,10 +56,17 @@ userController.post("/login", async (req:Request, res: Response) => {
             secure: true, 
             sameSite: 'none'
         })
-        res.set("Authorization", `Bearer ${access_token}`).json(loggedInUser)
+        res.set("Authorization", `Bearer ${access_token}`).json("Loggin Sucessful")
     }else{ 
         res.status(406).json({error: "Invalid Credentials "})
     }
+})
+
+userController.post("/logout", verifyRoute, (req: Request, res: Response) => { 
+    res.clearCookie("jwt")
+    res.clearCookie("refreshToken")
+    res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+    res.status(200).json({ message: 'Logged out successfully.' });
 })
 
 userController.get("/profile", verifyRoute, async(req: Request, res: Response) => { 
@@ -80,7 +78,7 @@ userController.get("/profile", verifyRoute, async(req: Request, res: Response) =
 })
 
 userController.put("/profile", verifyRoute, storage.single("user_image"), async(req: Request, res: Response) => { 
-    const {name, email, description, password}:{name: string, email: string, description: string, password: string} = req.body
+    const {name, email, description, password, state, LGA, city, home_address}:{name: string, email: string, description: string, password: string, state: string, LGA: string, city: string, home_address: string} = req.body
     const id = req.params.id as string
     const image = req.file 
     const userId = req?.userId
@@ -88,7 +86,7 @@ userController.put("/profile", verifyRoute, storage.single("user_image"), async(
     const userRepo = new userRepository()
     const userCase = new userUseCase(userRepo)
 
-    const updateUser = await userCase.updateUserDetails(userId!, name, email, description, password, image)
+    const updateUser = await userCase.updateUserDetails(userId!, name, email, description, password, image, state, LGA, city, home_address)
     res.json(updateUser)
 })
 

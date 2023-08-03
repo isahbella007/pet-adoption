@@ -7,12 +7,8 @@ class userUseCase {
         this.userRepository = userRepository
     }
 
-    async createUserWithoutImage(name:string, email:string, description:string, password: string){ 
-        return this.userRepository.addWithoutImage({name, email, description, password})
-    }
-
-    async createUserWithImage(name:string, email:string, description: string, password: string, image: Express.Multer.File){ 
-        return this.userRepository.addWithImage({name, email, description, password, image})
+    async createUser(name:string, email:string, description:string, password: string, state: string, LGA: string, city: string, home_address: string | null, image: Express.Multer.File | undefined){ 
+        return this.userRepository.addUser({name, email, description, password, state, LGA, city, home_address, image})
     }
 
     async LoginUser(email:string, password: string){ 
@@ -23,8 +19,8 @@ class userUseCase {
         return this.userRepository.getUserDetails(userId)
     }
 
-    async updateUserDetails(userId: string, name:string, email:string, description:string, password: string, image: Express.Multer.File | undefined){ 
-        return this.userRepository.updateUser(userId, {name, email, description, password, image})
+    async updateUserDetails(userId: string, name:string, email:string, description:string, password: string, image: Express.Multer.File | undefined, state: string, LGA: string, city: string, home_address: string){ 
+        return this.userRepository.updateUser(userId, {name, email, description, password, image, state, LGA, city, home_address})
     }
 }
 

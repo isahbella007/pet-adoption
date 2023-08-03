@@ -17,5 +17,55 @@ model User {
   description String
   password String @default("default_password")
   image String?
-  image_public_id String @default("mistake")
+  image_public_id String?
+  address Address?
+  pets Pets?
+}
+model Address {
+  id String @id @default(uuid()) @unique
+  user User @relation(fields: [user_id] , references: [id])
+  user_id String @unique
+  state String
+  LGA String
+  city String
+  home_address String?
+}
+
+model Pets{ 
+  id String @id @default(uuid()) @unique
+  user User @relation(fields: [user_id], references: [id])
+  user_id String @unique
+  name String
+  breed String
+  description String
+  height String
+  size String
+  gender String
+  good_with Good_With[]
+  coat_length String
+  behaviour Pet_Behaviour[]
+  location Pet_Address[]
+  urgent_adoption Boolean @default(false)
+  fee String?
+  flag String @default("PENDING")
+}
+model Good_With { 
+  id String @id @default(uuid()) @unique 
+  pet Pets @relation(fields: [pet_id], references: [id])
+  pet_id String @unique
+  good_with String
+}
+model Pet_Behaviour { 
+  id String @id @default(uuid()) @unique
+  pet Pets @relation(fields: [pet_id], references: [id])
+  pet_id String @unique
+  behaviour String
+}
+model Pet_Address{ 
+  id String @id @default(uuid()) @unique
+  pet Pets @relation(fields: [pet_id], references: [id])
+  pet_id String @unique
+  state String
+  LGA String
+  city String
 }
