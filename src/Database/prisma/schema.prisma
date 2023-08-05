@@ -16,7 +16,6 @@ model User {
   email String @unique
   description String
   password String @default("default_password")
-  image String?
   image_public_id String?
   address Address?
   pets Pets?

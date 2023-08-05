@@ -1,62 +1,68 @@
-import prisma from "../../Frameworks/Database/prisma/client"
+import prisma from "../../Database/prisma/client";
 import User from "../../Entities/User"
-import { PrismaClient } from "@prisma/client"
-import cloudinary from "../../Frameworks/Cloudinary/config"
+import { Prisma, PrismaClient } from "@prisma/client"
+import cloudinary from "../../Express/services/CloudinaryConfig";
 import { v4 as uuidv4 } from 'uuid';
-import sanitizePublicId from "../../Frameworks/Express/utils/PublicId";
+import sanitizePublicId from "../../Express/utils/PublicId";
+import { userRequest } from "../../Express/controllers/Users/createUser";
+import DatabaseErrorBuilder from "../../Express/utils/databaseErrorBuilder";
+import googleStorage from "../services/googleStorage";
+import loggerConfig from "../utils/logger";
 
-class userRepository {
+class UserRepository {
     prisma: PrismaClient 
     constructor(){ 
         this.prisma = prisma
     }
 
-    async addUser(userData: { name: string; email: string; description: string, password: string, state: string, LGA: string, city: string, home_address: string | null, image: Express.Multer.File | undefined }) { 
-        // before you create, check if email exits 
-        const duplicateEmail = await this.prisma.user.findFirst({ 
-            where: {email: userData.email}
-        })
-        
-        if(duplicateEmail){ 
-            return "Email already exists"
-        }else{
-            let secure_url 
-            let custom_public_id
-            
+    async addUser(userData: userRequest , image: Express.Multer.File | undefined) { 
+        const uuid = uuidv4()
+        let newUser
+        let mergedId: string | null = image !== undefined ? `${userData.name}${uuid}` : null
 
-            if(userData.image !== undefined){ 
-                const currentTimestamp = Math.floor(Date.now() / 1000);
-                const uuid = uuidv4()
-                const mergedId = `${userData.name}${uuid.replace(/-/g, '')}`
-                custom_public_id = sanitizePublicId(mergedId)
-                // add the image to the cloduinary 
-                const userNewImage = await cloudinary.uploader.upload(userData.image.path, {
-                    folder: "users/", 
-                    public_id: custom_public_id, 
-                    timestamp: currentTimestamp
+        try{ 
+            try{
+                newUser = await this.prisma.user.create({ 
+                    data:{ 
+                        address: { 
+                            create: {
+                                state: userData.state, 
+                                LGA: userData.LGA, 
+                                city: userData.city, 
+                                home_address: userData.home_address
+                            }
+                        },    
+                        name: userData.name, 
+                        email: userData.email, 
+                        description: userData.description,
+                        password: userData.password, 
+                        image_public_id: mergedId
+                    } 
                 })
-                secure_url = userNewImage.secure_url
+            }catch(error: any){
+                loggerConfig.error(error)
+                return new DatabaseErrorBuilder(error).build()
             }
-            const newUser = await this.prisma.user.create({ 
-                data:{ 
-                    address: { 
-                        create: {
-                            state: userData.state, 
-                            LGA: userData.LGA, 
-                            city: userData.city, 
-                            home_address: userData.home_address
-                        }
-                    },    
-                    name: userData.name, 
-                    email: userData.email, 
-                    description: userData.description,
-                    password: userData.password, 
-                    image: secure_url, 
-                    image_public_id: custom_public_id
-                }
-                
-            })
-            return new User(newUser.id, newUser.name, newUser.email, newUser.description, newUser.password,  newUser.image) 
+            
+            
+            if(image !== undefined){  
+                try{ 
+                    const userNewImage = await googleStorage.bucket("pet_api").upload(image.path, { 
+                        destination: `users/${mergedId}`, 
+                        public: false
+                    })
+                    
+                    // get the proper url to display the image. This is done because the storage is set to private so you decrypt it 
+                    const expiration = Date.now() + 2 * 60 * 1000;
+                    const [url] = await googleStorage.bucket("pet_api").file(`users/${mergedId}`).getSignedUrl({version: "v4", action: "read", expires: expiration})
+                }catch(error){ 
+                    loggerConfig.error(error)
+                }  
+            }
+            return newUser
+            
+        }catch(error:any){ 
+            loggerConfig.error(error)
         }
     }
 
@@ -102,7 +108,7 @@ class userRepository {
             }
             
             // check if the user created a new image to upload
-            let secure_url = loggedInUser.image
+            let secure_url 
             let custom_public_id = loggedInUser.image_public_id
             // upload the new picture 
             
@@ -143,7 +149,6 @@ class userRepository {
                       email: userData.email,
                       description: userData.description,
                       password: userData.password,
-                      image: secure_url,
                       image_public_id: custom_public_id,
                     },
                     include: { address: true },
@@ -161,4 +166,4 @@ class userRepository {
     }
     
 }
-export default userRepository
+export default UserRepository

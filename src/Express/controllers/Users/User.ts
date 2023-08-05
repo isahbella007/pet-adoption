@@ -1,34 +1,14 @@
-import express, { Request, Response } from "express";
-import userUseCase from "../../../../UseCase/User";
-import userRepository from "../../../../InterfaceAdapters/Repository/UserRepository";
-import multer from "multer"
+import { Request, Response } from "express";
+import userUseCase from "../../UseCase/User";
+import userRepository from "../../Repository/UserRepository";
 import jwt from "jsonwebtoken"
 import env from "dotenv"
-import verifyRoute from "../../middlewear/auth";
+import asyncHandler from "../../middlewear/asyncHandler";
 
 env.config({path: "../../.env"})
-const storage = multer({dest: './public/uploads/user/'})
 
-const userController = express.Router()
 
-userController.post("/create", storage.single("user_image"), async (req: Request, res: Response) => { 
-    const {name, email, description, password, state, LGA, city, home_address}: {name: string, email: string, description: string, password: string, state: string, LGA: string, city:string,  home_address: string, } = req.body
-
-    const image = req.file
-
-    const UserRepo = new userRepository()
-    const UsersUseCase = new userUseCase(UserRepo)
-
-    try{ 
-        const addNewUser = await UsersUseCase.createUser(name, email, description, password, state, LGA, city, home_address, image)
-        res.status(201).json(addNewUser)
-    }catch(error){ 
-        console.error("Error adding new user:", error);
-        res.status(501).json({error: "Failed to add new user"})
-    }
-})
-
-userController.post("/login", async (req:Request, res: Response) => { 
+const handleUserLogin =  async (req:Request, res: Response) => { 
     const {email, password}:{email:string, password: string} = req.body
     const userRepo = new userRepository()
     const userCase = new userUseCase(userRepo)
@@ -60,24 +40,25 @@ userController.post("/login", async (req:Request, res: Response) => {
     }else{ 
         res.status(406).json({error: "Invalid Credentials "})
     }
-})
+}
 
-userController.post("/logout", verifyRoute, (req: Request, res: Response) => { 
+const handleLogout = (req: Request, res: Response) => { 
     res.clearCookie("jwt")
     res.clearCookie("refreshToken")
     res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
     res.status(200).json({ message: 'Logged out successfully.' });
-})
+}
 
-userController.get("/profile", verifyRoute, async(req: Request, res: Response) => { 
+const handlegetUserProfile =  async(req: Request, res: Response) => { 
     const userRepo = new userRepository()
     const userCase = new userUseCase(userRepo)
     const userId = req?.userId ;
     const userProfile = await userCase.getUserDetails(userId!)
     res.status(200).json( userProfile)
-})
+}
 
-userController.put("/profile", verifyRoute, storage.single("user_image"), async(req: Request, res: Response) => { 
+// collect the storage.single("user_image") from the route 
+const handleUserUpdate = async(req: Request, res: Response) => { 
     const {name, email, description, password, state, LGA, city, home_address}:{name: string, email: string, description: string, password: string, state: string, LGA: string, city: string, home_address: string} = req.body
     const id = req.params.id as string
     const image = req.file 
@@ -88,6 +69,6 @@ userController.put("/profile", verifyRoute, storage.single("user_image"), async(
 
     const updateUser = await userCase.updateUserDetails(userId!, name, email, description, password, image, state, LGA, city, home_address)
     res.json(updateUser)
-})
+}
 
-export default userController;
+

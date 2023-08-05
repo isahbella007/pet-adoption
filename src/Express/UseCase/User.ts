@@ -1,5 +1,5 @@
-import UserRepository from "../InterfaceAdapters/Repository/UserRepository"
-
+import UserRepository from "../Repository/UserRepository"
+import { userRequest } from "../controllers/Users/createUser"
 class userUseCase { 
     private userRepository: UserRepository
     
@@ -7,8 +7,8 @@ class userUseCase {
         this.userRepository = userRepository
     }
 
-    async createUser(name:string, email:string, description:string, password: string, state: string, LGA: string, city: string, home_address: string | null, image: Express.Multer.File | undefined){ 
-        return this.userRepository.addUser({name, email, description, password, state, LGA, city, home_address, image})
+    async createUser({userData, image}:{userData:userRequest, image: Express.Multer.File | undefined}){
+        return this.userRepository.addUser(userData, image)
     }
 
     async LoginUser(email:string, password: string){ 

@@ -3,3 +3,5 @@ node_modules
 .env
 public/
 /src/Frameworks/Database/migrations/
+key.json
+key.identifier 
