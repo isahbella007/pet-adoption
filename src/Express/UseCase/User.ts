@@ -19,8 +19,12 @@ class userUseCase {
         return this.userRepository.getUserDetails(userId)
     }
 
-    async updateUserDetails(userId: string, name:string, email:string, description:string, password: string, image: Express.Multer.File | undefined, state: string, LGA: string, city: string, home_address: string){ 
-        return this.userRepository.updateUser(userId, {name, email, description, password, image, state, LGA, city, home_address})
+    async updateUserDetails({userId, userData, image}: {userId: string | undefined, userData: userRequest, image: Express.Multer.File | undefined}){ 
+        return this.userRepository.updateUser(userId, userData, image)
+    }
+
+    async getProfile(userId: string | undefined){ 
+        return this.userRepository.getUserProfile(userId)
     }
 }
 
