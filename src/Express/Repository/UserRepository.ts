@@ -1,18 +1,15 @@
-import prisma from "../../Database/prisma/client";
-import User from "../../Entities/User"
-import { Prisma, PrismaClient } from "@prisma/client"
-import cloudinary from "../../Express/services/CloudinaryConfig";
+import prisma from "../../prisma/client";
+import {PrismaClient } from "@prisma/client"
 import { v4 as uuidv4 } from 'uuid';
-import sanitizePublicId from "../../Express/utils/PublicId";
-import { userRequest } from "../../Express/controllers/Users/createUser";
+import { userRequest } from "../../Express/handlers/Users/createUser";
 import DatabaseErrorBuilder from "../../Express/utils/databaseErrorBuilder";
 import googleStorage from "../services/googleStorage";
 import loggerConfig from "../utils/logger";
-import ValidationError from "../utils/validationErrorBuilder";
+import ApiError from "../utils/ApiError";
 
 class UserRepository {
     prisma: PrismaClient 
-    constructor(){ 
+    constructor(prisma: PrismaClient){ 
         this.prisma = prisma
     }
 
@@ -99,7 +96,7 @@ class UserRepository {
 
     async updateUser(userId:string | undefined, userData: userRequest, image : Express.Multer.File | undefined){ 
         try{ 
-            if(userId === undefined){throw new ValidationError("User Id is required ",400 )}
+            if(userId === undefined){throw new ApiError("User Id is required ",400 )}
                 
             const loggedInUser = await this.getUserDetails(userId)
             if(loggedInUser!.image_public_id && image !== undefined){ 
@@ -120,7 +117,7 @@ class UserRepository {
                 where: { user_id: userId },
             });
 
-            if(!existingAddress){throw new ValidationError("User Address not found", 404)}
+            if(!existingAddress){throw new ApiError("User Address not found", 404)}
             
             const updatedAddress = await this.prisma.address.update({ 
                 where: {user_id: userId},
@@ -153,10 +150,10 @@ class UserRepository {
     }
 
     async getUserProfile(userId: string | undefined){ 
-        if(userId === undefined){throw new ValidationError("User id is needed", 400)}
+        if(userId === undefined){throw new ApiError("User id is needed", 400)}
 
         const userDetails = await this.getUserDetails(userId)
-        if(!userDetails){ throw new ValidationError("User Details not found", 400)}
+        if(!userDetails){ throw new ApiError("User Details not found", 400)}
 
         const signedURL = await googleStorage.bucket("pet_api").file(`users/${userDetails?.image_public_id}`).getSignedUrl({ 
             version: "v4", 

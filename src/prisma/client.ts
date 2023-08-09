@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client"
-import DatabaseErrorBuilder from "../../Express/utils/databaseErrorBuilder"
+import DatabaseErrorBuilder from "../Express/utils/databaseErrorBuilder"
 
 const prisma = new PrismaClient()
 

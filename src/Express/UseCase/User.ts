@@ -1,5 +1,5 @@
 import UserRepository from "../Repository/UserRepository"
-import { userRequest } from "../controllers/Users/createUser"
+import { userRequest } from "../handlers/Users/createUser"
 class userUseCase { 
     private userRepository: UserRepository
     

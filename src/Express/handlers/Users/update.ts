@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import userUseCase from "../../UseCase/User";
 import userRepository from "../../Repository/UserRepository";
 import { userRequest } from "./createUser";
-import ValidationError from "../../utils/validationErrorBuilder";
+import ApiError from "../../utils/ApiError";
 import ApiSucessResponse from "../../middlewear/apiResponseBuilder";
 
 export const handleUserUpdate = async(req: Request, res: Response) => { 
@@ -15,7 +15,7 @@ export const handleUserUpdate = async(req: Request, res: Response) => {
     const userCase = new userUseCase(userRepo)
 
     if(!userData.name || !userData.email || !userData.password || !userData.description || !userData.state || !userData.LGA || !userData.city){
-        throw new ValidationError("Fill all required fields", 400)
+        throw new ApiError("Fill all required fields", 400)
     }
 
     const updateUser = await userCase.updateUserDetails({userId, userData, image})

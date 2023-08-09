@@ -2,12 +2,12 @@ import express from "express"
 import multer from "multer"
 import verifyRoute from "../middlewear/verifyToken"
 import path from "path"
-import {createUserAccount} from "../controllers/Users/createUser"
-import { handleUserLogin } from "../controllers/Users/userLogin"
-import { handlegetUserProfile } from "../controllers/Users/profile"
-import { handleUserUpdate } from "../controllers/Users/update"
-import { handleLogout } from "../controllers/Users/userLogout"
-import { handleProfilePicture } from "../controllers/Users/profilePicture"
+import {createUserAccount} from "../handlers/Users/createUser"
+import { handleUserLogin } from "../handlers/Users/userLogin"
+import { handlegetUserProfile } from "../handlers/Users/profile"
+import { handleUserUpdate } from "../handlers/Users/update"
+import { handleLogout } from "../handlers/Users/userLogout"
+import { handleProfilePicture } from "../handlers/Users/profilePicture"
 
 const userRouter = express.Router()
 const storage = multer({dest: path.resolve('./public/uploads/user') })

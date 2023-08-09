@@ -1,4 +1,4 @@
-class ValidationError extends Error {
+class ApiError extends Error {
     status_code: number 
     message: string
     constructor(message: string, status_code: number){
@@ -9,4 +9,4 @@ class ValidationError extends Error {
     
 }
 
-export default ValidationError
+export default ApiError
