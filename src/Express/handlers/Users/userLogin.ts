@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import prisma from "../../../prisma/client";
 import userUseCase from "../../UseCase/User";
 import userRepository from "../../Repository/UserRepository";
 import jwt from "jsonwebtoken"
@@ -13,7 +14,7 @@ export const handleUserLogin = asyncHandler(async (req:Request, res: Response) =
     const {email, password}:{email:string, password: string} = req.body
     if(!email || !password){throw new ApiError("Fill all required fields", 400)}
     
-    const userRepo = new userRepository()
+    const userRepo = new userRepository(prisma)
     const userCase = new userUseCase(userRepo)
 
     const loggedInUser = await userCase.LoginUser(email, password)

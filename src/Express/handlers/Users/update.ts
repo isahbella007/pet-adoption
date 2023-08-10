@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import prisma from "../../../prisma/client";
 import userUseCase from "../../UseCase/User";
 import userRepository from "../../Repository/UserRepository";
 import { userRequest } from "./createUser";
@@ -11,7 +12,7 @@ export const handleUserUpdate = async(req: Request, res: Response) => {
     const image = req.file 
     const userId = req?.userId 
     
-    const userRepo = new userRepository()
+    const userRepo = new userRepository(prisma)
     const userCase = new userUseCase(userRepo)
 
     if(!userData.name || !userData.email || !userData.password || !userData.description || !userData.state || !userData.LGA || !userData.city){
