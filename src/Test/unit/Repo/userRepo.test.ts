@@ -1,5 +1,5 @@
-import UserRepository from "../../Express/Repository/UserRepository"
-import { prismaMock } from "../../prisma/singleton";
+import UserRepository from "../../../Express/Repository/UserRepository"
+import { prismaMock } from "../../../prisma/singleton";
 
 
 describe("User Repository", () => { 
@@ -21,18 +21,16 @@ describe("User Repository", () => {
         city: "Test City", 
         home_address: "Test home address"
     };
+
+    const functionResponse = { 
+        id: "22-55-87", name: "Test User", email: "test@example.com", description: "A test user", password: "A test user", image_public_id: "MockTest-23234-234345"
+    }
     
     const something = jest.spyOn(prismaMock.user, 'create')
-    something.mockResolvedValue({id: "22-55-87", name: "Test User", email: "test@example.com", description: "A test user", password: "A test user", image_public_id: "MockTest-23234-234345"})
+    something.mockResolvedValue(functionResponse)
 
     const result = await userRepository.addUser(userData, undefined)
-    expect(result).toEqual({ id: "22-55-87",
-        name: 'Test User',
-        email: 'test@example.com',
-        description: "A test user",
-        password: 'A test user',
-        image_public_id: "MockTest-23234-234345"
-    });
+    expect(result).toEqual(functionResponse);
     
     })
 

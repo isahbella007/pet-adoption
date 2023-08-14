@@ -18,7 +18,7 @@ model User {
   password String @default("default_password")
   image_public_id String?
   address Address?
-  pets Pets?
+  pets Pets[]
 }
 model Address {
   id String @id @default(uuid()) @unique
@@ -33,31 +33,40 @@ model Address {
 model Pets{ 
   id String @id @default(uuid()) @unique
   user User @relation(fields: [user_id], references: [id])
-  user_id String @unique
+  user_id String 
+  pet_type String
   name String
   breed String
   description String
-  height String
-  size String
+  size Int
   gender String
   good_with Good_With[]
   coat_length String
   behaviour Pet_Behaviour[]
   location Pet_Address[]
+  pet_images Pet_Images[]
   urgent_adoption Boolean @default(false)
-  fee String?
+  fee Int?
   flag String @default("PENDING")
+}
+
+model Pet_Images { 
+  id String @id @default(uuid()) @unique
+  pet Pets @relation(fields: [pet_id], references: [id])
+  pet_id String 
+  pet_image_id String
+
 }
 model Good_With { 
   id String @id @default(uuid()) @unique 
   pet Pets @relation(fields: [pet_id], references: [id])
-  pet_id String @unique
+  pet_id String 
   good_with String
 }
 model Pet_Behaviour { 
   id String @id @default(uuid()) @unique
   pet Pets @relation(fields: [pet_id], references: [id])
-  pet_id String @unique
+  pet_id String
   behaviour String
 }
 model Pet_Address{ 

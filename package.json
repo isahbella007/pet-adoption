@@ -7,7 +7,8 @@
     "start": "node dist/Express/index.js ",
     "dev": "nodemon src/Express/index.ts",
     "build": "tsc -p .",
-    "test": "jest --watchAll --verbose "
+    "test": "jest --watchAll --verbose ",
+    "testUC": "cd src/Test/unit/useCase && jest --watchAll --verbose"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +27,8 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
     "uuid": "^9.0.0",
-    "winston": "^3.10.0"
+    "winston": "^3.10.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",

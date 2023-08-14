@@ -1,11 +1,11 @@
 import prisma from "../../prisma/client";
 import {PrismaClient } from "@prisma/client"
 import { v4 as uuidv4 } from 'uuid';
-import { userRequest } from "../../Express/handlers/Users/createUser";
 import DatabaseErrorBuilder from "../../Express/utils/databaseErrorBuilder";
 import googleStorage from "../services/googleStorage";
 import loggerConfig from "../utils/logger";
 import ApiError from "../utils/ApiError";
+import { userRequest } from "../types/user";
 
 class UserRepository {
     prisma: PrismaClient 
